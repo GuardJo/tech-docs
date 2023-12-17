@@ -14,7 +14,7 @@ CRC (Circlic Redundancy Checking)이란, 순환 중복 검사라는 뜻을 지�
 
 ## 1-2 CRC 계산 방식
 
-![[Pasted image 20231216185632.png]]
+![](../images/Pasted%20image%2020231216185632.png)
 ### 송신측
 
 1. CRC 코드 지정

@@ -13,7 +13,8 @@ Domain Named System의 준말이며, www.naver.com 과 같이 사용자가 읽�
 4. 성능 향상을 위해 Domain 명을 기반으로 캐싱 기능 제공
 5. 최상위 Domain 및 하위 Domain을 포함한 계층적 구조
 # 3. DNS 계층 구조
-![[Pasted image 20231216210018.png]]
+
+![](../images/Pasted%20image%2020231216210018.png)
 ## 3-1. DNS 서버 종류
 DNS는 계층적 구조를 기반으로하여 아래와 같은 서버들로 구성되어 있다.
 ### 3-1. ROOT
