@@ -48,3 +48,8 @@ Tree 구조 내의 모든 Node를 1회씩 방문하는 방법으로 아래와 �
 ![](images/Pasted%20image%2020231218195157.png)
 
 위의 경우 좌측 끝의 C부터 시작하여 우측의 D를 거쳐 Node인 B로 넘어가며, 이후 다시 다음 Sub Tree의 F부터 시작하여, 오른쪽인 G를 타고 Node 인 E 를 거친 후 마지막 Root Node를 방문한다.
+
+# Ref
+- https://velog.io/@brian_kim/JavaScript-%ED%8A%B8%EB%A6%AC-%EC%88%9C%ED%9A%8C
+- https://gmlwjd9405.github.io/2018/08/12/data-structure-tree.html
+- https://jud00.tistory.com/entry/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0-%ED%8A%B8%EB%A6%ACTree%EB%9E%80
