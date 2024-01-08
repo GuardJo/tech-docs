@@ -291,3 +291,34 @@ public class ContextPath {
 > 
 > ![](images/Pasted%20image%2020240108161334.png)
 
+# 5. 자원을 직접 명시하지 말고 Dependency Injection을 사용하라
+하나의 객체는 작업 수행을 위해 여러 다른 객체의 인스턴스들을 사용하게 된다. 이 때 이러한 인스턴스들을 수행할 객체 내부에서 생성할 경우 여러 문제가 발생할 수 있다.
+
+```java
+public class MainClass {
+	private final Item item = new Item();
+
+	public void checkItem() {
+		item.check();
+	}
+}
+```
+예를 들어 위와 같이 Item 이라는 객체 의존을 지닌 MainClass 객체가 있을 경우, 해당 객체는 내부에 생성된 인스턴스에 강하게 묶여 있는 형태가 된다.
+
+이는 만약 다른 Item 인스턴스나 하위 타입의 인스턴스가 필요할 경우, 별도의 수정 작업 혹은 개선이 필요하게 된다.
+
+이러한 상황에 대응하며, 의존 객체와의 관계성을 낮추기 위해 의존 객채 주입(Dependency Injection) 패턴이 존재한다.
+```java
+public class MainClass {
+	private final Item item;
+
+	public MainClass(Item item) {
+		this.item = item;
+	}
+
+	public void checkItem() {
+		item.check();
+	}
+}
+```
+위와 같이 의존성이 있는 객체 인스턴스(Item)을 생성자를 통해 외부에서 주입받음으로써, MainClass의 수정 없이 Item 타입의 다른 인스턴스 혹은 Item 하위 타입의 인스턴스 등 다양한 인스턴스들을 주입받아 사용할 수 있게 된다.
