@@ -252,3 +252,42 @@ public enum Singleton {
 
 enum 타입으로 구성할 경우 직렬화 상황이나 Reflection API 를 통한 강제 인스턴스 생성 등을 모두 막아준다
 - *하지만 반환하려는 Singleton 객체가 enum외의 객체를 상속한다면 사용할 수 없다.*
+# 4. 인스턴스화를 막으려거든 private 생성자를 사용하라.
+일부 객체는 정적 필드와 메소드들로만 이루어진 경우가 있을 수 있다.
+이러한 객체들의 경우 인스턴스를 생성할 필요도 없으며, 생성자를 제공해줄 필요도 없다.
+- *ex) 유틸리티성 객체*
+
+아래는 실제 실무에서 구성되어 있는 유틸리티성 객체이다.
+```java
+public class ContextPath {  
+    /* APU urls */  
+    public static final String AGENTS = "/agents";
+    ...
+}
+```
+
+위의 경우 단순 ContextPath들을 정적 필드로 묶어 놓은 유틸리티성 객체이나 아래와 같이 인스턴스 생성이 가능하다.
+```java
+ContextPath conextPath = new ContextPath();
+```
+
+이러한 유틸리티성 객체는 인스턴스를 선언해서 사용할 일이 없으며, 혹여 다른 사용자가 이를 보고 별도의 인스턴스를 생성해서 작업을 하거나 상속해서 하위 객체를 만들게 될 수도 있다.
+
+이러한 요소를 막기 위해서는 간단히 아래와 같이 `private`한 기본 생성자를 구성해두면 된다.
+```java
+public class ContextPath {  
+    /* APU urls */  
+    public static final String AGENTS = "/agents";
+    ...
+    private ContextPath() {
+	    // 기본 생성자
+    }
+}
+```
+애초에 문제가 되는 요소가 생성자가 열려있기 때문인데, 이는 Java에서 별도의 생성자를 구성하지 않을 경우 `public` 한 기본생성자를 만들기 때문이다. 이를 막기 위해 `private` 제한자의 기본생성자를 구성하게 함으로써 이러한 생성자 접근을 원천적으로 막을 수 있다.
+
+> [!NOTE]
+> 본인이 사용하는 Intellij IDE에서는 이러한 유틸리티성 객체 생성 시 아래와 같은 경고를 출력해준다.
+> 
+> ![](images/Pasted%20image%2020240108161334.png)
+
