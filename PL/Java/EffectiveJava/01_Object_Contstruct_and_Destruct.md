@@ -47,7 +47,7 @@ public static BigInteger probablePrime(int bitLength, Random rnd) {
 허나 정적 팩토리 메소드로 인스턴스를 생성할 경우, 구현에 따라 이미 기생성된 인스턴스를 반환함으로써, 기존 인스턴스를 재활용할 수 있다.
 - *ex) `Boolean.valueOf()`는 각각 기생성된 true, false 인스턴스를 조건에 맞춰 반환한다.*
 
-> [!INFO]
+> [!NOTE]
 > **Instance-controlled Class**
 > 
 > 위와 같이 인스턴스의 신규 생성, 혹은 재활용 등을 제어하는 클래스를 Instance-controlled Class(인스턴스 통제 클래스) 라고 한다.
@@ -59,7 +59,7 @@ public static BigInteger probablePrime(int bitLength, Random rnd) {
 
 이러한 장점을 통해 사용자에게 서비스를 제공하는 제공자 입장에서는 추상화된 객체 및 그에 대한 정작 팩토리 메소드 하나만으로 하위 요소들을 구별하여 제공할 수 있게 된다.
 
-> [!INFO]
+> [!NOTE]
 > **인터페이스 객체에서의 정적 메소드 선언**
 > 
 > Java8 이전에는 인터페이스 객체에서의 정적 메소드 선언이 불가했으나, 이후 버전부터는 인터페이스 객체에도 정적 메소드 선언이 가능하다.
@@ -77,7 +77,7 @@ public static BigInteger probablePrime(int bitLength, Random rnd) {
 
 이러한 특징 덕에 JPA 나 JDBC 등과 같은 Service Provide Framework 구성이 가능해진다.\
 
-> [!INFO]
+> [!NOTE]
 > **Service Provide Framework**
 > 
 > JPA, JDBC 등과 같이 사용자에게 제공되는 일종의 프레임워크. 크게 구현체의 동작을 정의하는 `Service Interface`, 구현체를 등록하기 위한 `Provide registration API`, 사용자가 인스턴스 획득하기 위한 `Service access API` 로 이루어져 있다.
@@ -163,9 +163,92 @@ class Example<T> {
 
 Builder 객체가 별도로 기존 객체에 필요한 필드들을 별도로 지니고 있기에 build() 메소드를 통한 실제 객체 구성이 가능하며, Builder 객체 생성 시점에 불변 값들을 구성할 수 있다.
 또한 Builder에서 제공하는 setter들은 Builder 객체를 반환 타입으로 지니기에 `Fluent API` 형태로 구성할 수 있어 사용자 입장에서 가독성도 향상된다.
-> [!INFO]
+> [!NOTE]
 > **Fluent API**
 > 
 > 메소드 호출이 chain 처럼 연결되어 호출되는 형태
 > - ex) `builder().name("test").age(15).build();`
 
+# 3. private 생성자나 enum 타입으로 Singleton임을 보증하라
+Singleton이란 인스턴스를 오직 하나만 생성할 수 있는 객체를 뜻한다.
+별도의 상태 값이 존재하지 않거나, 설계 상 유일해야할 객체 등에 Singleton 을 적용하여, 유일한 인스턴스임을 보장한다.
+
+## 3-1. Singleton 적용 방식
+Singleton 객체는 일반적으로 `private` 접근 제한자로 생성자를 구성하여, 해당 객체 내부에서 생성하는 것 외에는 인스턴스를 생성할 수 없게 제한한다.
+
+이후 아래 두 방식으로 기생성된 인스턴스에 대한 반환을 지원한다.
+### 3-1-1. public static final 필드 방식
+```java
+public Singleton {
+	public final static Singleton INSTANCE = new Singleton();
+
+	private Singleton() {
+		// 생성자
+	}
+}
+```
+`private` 제한을 지닌 생성자를 통해 생성된 인스턴스를 `public` 하게 선언된 정적 상수 필드에 주입하여 반환한다.
+
+위와 같이 정적 상수 필드로 제공하기 때문에 해당 객체가 Singleton 객체임을 javadoc 입장에서 명시적으로 알 수 있다. 또한 별도 메소드 호출 없이 인스턴스를 가져올 수 있다는 장점이 있다.
+
+### 3-1-2. 정적 팩토리 메소드 방식
+```java
+public Singleton {
+	private final Singleton INSTANCE = new Singleton();
+
+	private Singleton() {
+		// 생성자
+	}
+
+	public static Singleton getInstance() {
+		return INSTANCE;
+	}
+}
+```
+유일하게 구성된 인스턴스를 필드 자체로 반환하는 것이 아닌 정적 팩토리 메소드 형태로 반환한다.
+
+이를 통해 추후 Singleton 객체가 Singleton이 아니게 변경 될 경우 외부 호출의 변경 없이 수정할 수 있으며, 호출하는 Thread 별로 별도 인스턴스를 넘겨주게 할 수도 있다.
+
+또한, 정적 메소드 형태이기에 Java의 `Supplier<>` 객체 형태로 함수형 프로그래밍 기법을 제공할 수 있다.
+- *ex) `Singleton::getInstance`*
+> [!NOTE]
+> **Supplier**
+> 
+> Java 8에서 추가된 함수형 인터페이스 객체 중 하나로 내부적으로 해당 타입 객체를 그저 반환하는 `T get()` 메소드 하나만을 지니고 있다.
+> 
+> 이는 조건문 등에 따라 불필요한 연산 작업을 최소화하기 위해 사용되는 메소드로써 아래와 같은 경우 사용된다.
+> ```java
+> if (a == b || () -> execute()) {
+> 	...
+> }
+> ```
+> 
+> 위와 같은 코드에 대해서 `a == b`
+가 성립하지 않을 때에는 execute() 함수를 수행할 필요 없으며, 이러한 경우 `() -> execute()` 와 같이 Supplier 형태의 함수 인터페이스를 통해 불필요한 연산을 수행하지 않게 할 수 있다.
+
+> [!CAUTION]
+> **Singleton 객체의 직렬화**
+> 
+> 두 방식 모두에서 발생하는 문제로, Singleton 객체에 대해서 직렬화 시에는 다음과 같이 구성해야 한다.
+> 
+> 1. Singleton 객체의 모든 멤버 필드들을 `transient`로 선언하여 직렬화에 포함되지 않게 구성
+> 2. readResolve() 메소드 구현
+> 	```java
+> 	// 역직렬화 시에 신규 인스턴스가 아닌 기존 인스턴스를 반환하도록 지정
+> 	public Object readResolve() {
+> 		return INSTANCE;
+> 	}
+> 	```
+>    
+> 이러한 작업이 필요한 이유는 Singleton 객체를 직렬화 한 후 역직렬화 시에 별도로 `readResolve()` 를 구현하지 않을 경우 기본적으로 신규 인스턴스를 생성하여 반환하기 때문이다.
+
+### 3-1-3. enum 타입 방식
+Singleton 객체를 반환하는 방식들 중 가장 간결한 방식으로, 원소가 하나뿐인 enum 객체를 생성하는 것이다.
+```java
+public enum Singleton {
+	INSTANCE;
+}
+```
+
+enum 타입으로 구성할 경우 직렬화 상황이나 Reflection API 를 통한 강제 인스턴스 생성 등을 모두 막아준다
+- *하지만 반환하려는 Singleton 객체가 enum외의 객체를 상속한다면 사용할 수 없다.*
