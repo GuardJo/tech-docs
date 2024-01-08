@@ -18,7 +18,7 @@ OOP란 Object-Oriented Programming의 약자로 기존 함수 기반의 절차�
 
 OOP 관점으로 설계를 하기 위해서는 SOLID 원칙을 지켜야 한다.
 SOLID 원칙은 각각 SRP, OCP, LSP, ISP, DIP에서 약자를 따와 만들어졌다.
->[!INFO]
+>[!NOTE]
 >5가지 원칙이 있으나 해당 원칙들 결국, OOP 관점에서 다형성과 상속을 활용하여 객체들 사이의 관계를 유연하게 구성하는것이다.
 ## 2-1. SRP : Single Responsibility Principle
 단일 책임 원칙이라하며, 하나의 객체는 오직 하나의 책임만을 지녀야한다. 이는 바로 말하면 하나의 객체가 변경 될 때에는 오직 하나의 이유로 인해 변경되어야 함을 뜻한다.

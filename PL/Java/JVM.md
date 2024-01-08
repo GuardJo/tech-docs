@@ -82,7 +82,7 @@ Interpreter의 단점을 보완하기 위해 도입된 것으로써, 바이트�
 이후 해당 바이트코드에서 실행된 메소드들은 이미 Natvice Code로 변경되어 있기에 별도의 Interpreter의 작업 없이 코드를 실행 할 수 있다. 
 
 코드를 한 줄 씩 Interpreting 하는 것이 아니기에 Interpreter보다 빠르지만, 바이트코드 전체를 컴파일 하는데에 비용이 소모되므로, JVM은 모든 코드를 JIT 컴파일러로 컴파일하지 않고 Interpreter를 기반으로 작업을 수행하다가 일정 기준이 넘어가면 JIT 컴파일러로 수행한다.
->[!INFO]
+>[!NOTE]
 >**Natvie Code**
 >
 >Java 입장에서 구현체에 가까운 C나 C++, 어셈블리어 등으로 구성된 코드를 뜻한다.
@@ -92,7 +92,7 @@ JVM의 주요 장점 중 하나로써, 해당 요소를 통해 Heap 메모리 �
 
 Garbage Collector는 정해진 규칙에 따라 메모리 내부를 정리하는데, 정리하는 구역 및 크기에 따라 Minor GC와 Major GC로 나뉜다.
 
-> [!INFO]
+> [!NOTE]
 > **STOP THE WORLD**
 > 
 > Major GC가 발생할 경우 JVM 내 모든 Thread는 Major GC 작업이 끝날 때까지 동작을 멈추게 되며, 이를 Stop The World 라고 표현한다.
@@ -116,7 +116,7 @@ Java 를 기반으로 컴파일되어 생성된 바이트 코드가 아닌 실�
 ### 2-3-4. Heap
 JVM 위의 모든 Thread와 공유하는 메모리 영역으로, new 키워드를 통해 생성되는 Class나 인스턴스 변수들을 저장하는 공간이다.
 해당 영역에서 참조되지 않거나 참조가 해제된 요소들을 대상으로 GC가 발생한다.
-> [!INFO]
+> [!NOTE]
 > JVM Stack에서 저장되는 지역 변수나 데이터 등은 실제로는 Heap 메모리에 대한 참조 주소값만을 지니고 있으며, 해당 데이터를 조회할 때에는 Stack 영역에 명시된 Heap 메모리 주소값을 통해 Heap 저장된 실제 인스턴스를 조회하게 되는 것이다.
 
 **Heap 구조**
@@ -127,7 +127,7 @@ Heap 영역은 아래와 같은 구조로 이루어져 있다.
 - Permanent
 	생성된 객체들에 대한 주소값이 저장된 공간이며, ClassLoader에 의해 Loading된 Class나 메소드 들에 대한 Meta 데이터가 저장되어 있다.
 	- Reflection API에 의해 Class나 메소드 등을 동적으로 loading 할 때 사용된다.
-> [!INFO]
+> [!NOTE]
 > **Reflection API**
 > 
 > 객체를 통해 Class의 정보를 분석해내는 기법
@@ -139,7 +139,7 @@ Heap 영역은 아래와 같은 구조로 이루어져 있다.
 	- 여기서 발생하는 GC가 Minor GC 이다.
 	- Eden : 객체가 최초로 생성되는 공간
 	- Survivor 0, 1 : Eden에서 참조되는 체들의 저장 공간
-> [!INFO]
+> [!NOTE]
 > Eden 영역이 가득 찰 경우 Survivor 영역으로 복사 한 후 나머지 객체들을 제거한다.
 
 - Old

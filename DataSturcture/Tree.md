@@ -25,7 +25,7 @@ Tree는 Node와 Edge로 이루어져 있으며 아래와 같은 특징들이 존
 5. 모든 Child Node는 1개의 Parent Node만을 갖는다.
 6. 모든 Node는 연결되어 있다.
 7. 임의의 Node에서 다른 Node로 가는 경로는 1개만 존재한다.
->[!INFO]
+>[!NOTE]
 >Tree 는 순회가 존재할 수 없기에, 순회가 없는 연결 그래프로 볼 수 있다.
 > - *Tree 자체가 결국 최소신장그래프임*
 # 3. Tree의 순회
