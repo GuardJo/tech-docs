@@ -322,3 +322,58 @@ public class MainClass {
 }
 ```
 위와 같이 의존성이 있는 객체 인스턴스(Item)을 생성자를 통해 외부에서 주입받음으로써, MainClass의 수정 없이 Item 타입의 다른 인스턴스 혹은 Item 하위 타입의 인스턴스 등 다양한 인스턴스들을 주입받아 사용할 수 있게 된다.
+
+# 6. 불필요한 객체 생성을 피하라
+반드시 객체 인스턴스가 개별적으로 구성되어야할 필요가 없다면, 하나의 인스턴스를 재사용하는 것이 성능 및 가독성 측면에서 좋다.
+
+예를 들어 Strng 타입 객체 인스턴스는 두 가지 방법으로 초기화 할 수 있다.
+```java
+String str1 = new String("Test");
+String str2 = "Test2";
+```
+첫번째의 경우, 매번 String 타입의 인스턴스를 신규로 생성한다. 허나 두번째의 경우 JVM 내부적으로 `"Test2` 와 동일한 값들은 하나의 인스턴스로 취급하기에 하나의 인스턴스만 생성된 후 재사용된다.
+
+인스턴스를 생성하는 비용이 상대적으로 비싼 경우, 이러한 객체 인스턴스를 매번 생성하는 것은 자원 관리 측면에서도 좋지 않으며, 더욱이 하나의 인스턴스만으로 유지가 가능하다면 최초 생성된 인스턴스를 재사용하는 것이 OOP 측면에서도 지향하는 요소이다.
+# 7. 다 쓴 객체 참조를 해제하라
+C/CPP 와 다르게 Java에서는 더 이상 쓰이지 않는 객체들은 `Garbage Collector`에서 메모리를 알아서 해제해준다.
+허나 이러한 상황에 익숙해져 할당된 메모리를 신경쓰지 않으면 일부 상황에서는 GC가 일어나지 않아 메모리 누수가 발생할 수 있다.
+
+```java
+public class TestStack {
+	private Object[] objects;
+	private int size = 0;
+	...
+	public Object pop() {
+		if (size == 0) {
+			// exception
+		}
+		return objects[--size];
+	}
+	...
+}
+```
+
+만약 위와 같이 직접 Stack을 구현했을 경우, 어느 정도 Objects[] 에 데이터가 쌓인 상태에서 pop() 함수 호출을 통해 index 위치를 조정할 경우, 해당 index보다 상위에 남아있는 데이터들은 여전히 참조되어 있어 메모리 해제가 되지 않는다.
+
+위와 같이 메모리에 직접 접근하게 되는 배열 타입과 같은 객체들에서는 이러한 메모리 해제를 신경써야 하며, 아래와 같이 메모리를 직접 해제해주어야 한다.
+```java
+public Object pop() {
+	...
+	Object result = objects[--size];
+	objects[size] = null;
+	return result
+}
+```
+
+Java에서 특정 인스턴스의 메모리를 해제하려면 해당 인스턴스를 null로 초기화 해주면 된다.
+
+> [!NOTE]
+> **WeakReference**
+> 
+> Java에서는 `WeakReference`라는 약한 참조 기반의 객체 및 기능을 제공한다.
+> 아래와 같이 사용할 수 있으며, 이렇게 선언된 객체는 원본 인스턴스의 메모리가 해제 되었을 경우, 해당 인스턴스를 참조하던 다른 인스턴스들도 적재된 메모리를 제거한다.
+> 
+> ```java
+> Integet number = 1;
+> WeakReference<Integer\> ref = new WeakReference(number);
+> ```
