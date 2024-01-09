@@ -388,3 +388,29 @@ Java에서는 객체에 대한 소멸자로 `finalizer`와 `cleaner`를 제공�
 또한 악의적인 기능을 담은 `finalizer`를 구현하여 상위 객체의 직렬화 과정에서 `readResolve()`등의 메소드를 구현하여 직렬화 간 예외 발생 시 하위 요소의 `finalizer`를 호출하여, 악의적인 기능을 실행하게 할 수도 있다.
 
 그렇기에 Java에서는 `finalizer`나 `cleaner` 대신 `AutoCloseable` 에 대한 구현체를 구성하여, 인스턴스 할당 후 작업이 끝나면 `close()`를 호출하여 안전하게 자원을 해제해주는 것이 좋다.
+
+# 9. try-finally 보다는 try-with-resources를 사용하라
+Java 7 이전에는 close() 필요한 객체들의 경우 아래와 같이 사용하였다.
+```java
+BufferedReqder br = new BufferedReader(new FileReader(file));
+
+try {
+	return br.readLine();
+} finally {
+	br.close();
+}
+```
+
+자원에 대한 직접 해제가 필요한 `BufferedReader`와 같은 객체 사용 후, 무조건적으로 해당 자원을 닫기 위해 try-finally 구문을 통해 `close()` 메소드를 직접 호출하였다.
+
+위와 같은 객체를 하나만 사용할 때에는 비교적 괜찮으나 여러 close() 가 필요한 객체들을 선언해서 사용해야할 경우, 코드가 난잡해지고 사용자의 부주의로 일부 자원을 해제하지 않는 경우가 발생할 수 있다.
+
+하지만 이러한 상황 덕인지 Java 7부터는 try-with-resource 문법을 통해 이러한 자원의 해제 작업을 자동으로 처리할 수 있도록 아래와 같이 지원하게 되었다.
+
+```java
+try (BufferedReader br = new BufferedReader(file)) {
+	return br.readLine;
+}
+```
+
+try() 문 내에 `Autocloseable`구현체로 이루어진 객체를 초기화 할 경우, try() 문 밖으로 나갈 때 Java 내부적으로 `Autocloseable`의 유일한 인터페이스 메소드인 `close()`를 호출하여 자동으로 자원을 해제해준다.
