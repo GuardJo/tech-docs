@@ -377,3 +377,14 @@ Java에서 특정 인스턴스의 메모리를 해제하려면 해당 인스턴�
 > Integet number = 1;
 > WeakReference<Integer\> ref = new WeakReference(number);
 > ```
+
+# 8. finalizer와 cleaner 사용을 피하라
+Java에서는 객체에 대한 소멸자로 `finalizer`와 `cleaner`를 제공한다.
+허나 C++ 의 소멸자와 다르게 Java의 소멸자들은 어느 시점에 호출될 지 작성자 입장에서는 알 수 가 없다. 
+
+일반적으로 Java에서 객체 인스턴스에 대한 생명주기는 GC를 통한 메모리 관리 하에 이루어지며, `finalizer`와 `cleaner`는 GC에 의해 객체가 소멸 될 때에나 실행되며, 이는 명확하게 어느 시점인지 정해진 것이 아니라, 해당 환경의 메모리 상황에 따라 다르다.
+- `System` 객체의 `gc()`나 `runFinalization()` 메소드가 있으나 반드시 소멸자를 실행시켜준다고 보장 할 수는 없다.
+
+또한 악의적인 기능을 담은 `finalizer`를 구현하여 상위 객체의 직렬화 과정에서 `readResolve()`등의 메소드를 구현하여 직렬화 간 예외 발생 시 하위 요소의 `finalizer`를 호출하여, 악의적인 기능을 실행하게 할 수도 있다.
+
+그렇기에 Java에서는 `finalizer`나 `cleaner` 대신 `AutoCloseable` 에 대한 구현체를 구성하여, 인스턴스 할당 후 작업이 끝나면 `close()`를 호출하여 안전하게 자원을 해제해주는 것이 좋다.
