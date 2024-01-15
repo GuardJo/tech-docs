@@ -217,3 +217,88 @@ class Rectangle extends Figure {
 
 위와 같이 `Abstract Class`로 Figure 객체를 구성한 후 공통적으로 필요한 `area()`함수만을 구성해둔 후 Circle과 Rectangle 등 각각 개별적으로 필요한 필드들은 해당 객체에서 선언하면, 앞선 태그를 사용하는 방식보다 훨씬 효율적으로 코드를 구성할 수 있으며, 사용자 실수도 줄일 수 있다.
 - *또한 이렇게 구성함으로써 향후 다른 도형 객체들로 확장하기도 용이함*
+# 10. 멤버 클래스는 되도록 static으로 만들라
+Java에서는 `Class` 내에 또 다른 `Class`를 생성할 수 있다. 이러한 `Class`를 `Nested Class`, 중첩 클래스라고 한다.
+
+중첩 클래스의 경우 크게 아래 4경우로 구분된다.
+- 정적 멤버 클래스
+- 비정적 멤버 클래스
+- 익명 클래스
+- 지역 클래스
+
+## 10-1. 정적 멤버 클래스
+정적 멤버 클래스는 해당 클래스의 바깥 클래스에 필요한 요소들을 별도 객체로 구성할 필요가 있을 때 구현한다.
+
+```java
+class Parent {
+	void print() {
+		System.out.println(ParentPrinter.LOG_FORMAT + "hello?");
+	}
+
+	private static class ParentPrinter {
+		final static String LOG_FORMAT = "log : ";
+		...
+	}
+}
+```
+
+위와 같이 일반적으로 정적 멤버 클래스는 로직 수행 간에 바깥 클래스와의 참조 등이 필요하지 않은 독립적인 형태로 구현이 가능하다.
+
+## 10-2. 비정적 멤버 클래스
+정적 멤버 클래스와 다르게 해당 클래스는 바깥 클래스에 일부 종속적인 요소를 기능에 포함하고 있다.
+
+```java
+public class MySet<E> extends AbstractSet<E> {
+	...
+	@Override
+	public Iterator<E> iterator() {
+		return new MyIterator();
+	}
+	...
+	private class MyIterator implements Iterator<E> {
+		...
+	}
+}
+```
+
+그렇기에 해당 클래스를 사용하기 위해서는 바깥 클래스에서 초기화 작업이 필요하며 이에 따라, 해당 클래스와 참조 관계가 구성된다.
+- *static을 생략하여 비정적 멤버 클래스로 구성할 경우 바깥 인스턴스로부터의 숨은 참조가 발생하여 해당 공간 만큼 자원을 추가로 소모하게 됨*
+- *또한 비정적 멤버 클래스가 참조를 지니고 있기에 바깥 클래스가 GC에 의한 제거가 불가해지는 경우도 발생함.*
+
+## 10-3. 익명 클래스
+익명 클래스는 앞선 멤버 클래스들과는 다르게 쓰이는 시점에 즉각적으로 인스턴스가 생성되고 작업을 수행한다.
+
+```java
+public class Parent {
+	public void test() {
+		System.out.println("Test : " + new AnonymousClass() {
+			@Override
+			public String toString() {
+				"익명 클래스";
+			}
+		});
+	}
+}
+```
+
+위와 같이 작업 수행 간에 일회성으로 작업이 필요한 경우에 주로 사용된다.
+- *java 8 이후에는 람다가 지원되면서 해당 요소를 대체하게 됨.*
+
+## 10-4. 지역 클래스
+지역 변수가 선언되는 모든 부분에 선언될 수 있는 클래스
+
+```java
+void print() {
+	class Printer {
+		...
+	}
+	...
+}
+```
+
+특정 메소드 내에서만 사용할 클래스들을 선언하여 사용한다.
+
+> [!NOTE]
+> Nested Class는 바깥 클래스와의 관계가 필요하지 않는 경우에는 왠만하면 정적 멤버 클래스로 생성하는 것이 메모리 관리 및  효율성 측면에서 이롭다.
+> 
+> 비정적 멤버 클래스의 경우에는 각각의 인스턴스가 바깥 인스턴스를 참조하기에 그만큼 메모리를 사용하며 생성 및 제거 시에 관련 작업들에 리소스를 사용하기 때문이다.
