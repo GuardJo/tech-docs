@@ -132,4 +132,13 @@ public interface SingerSongwriter extends Singer, Songwriter {
 > 
 > `Interface`와 `Abstract class`의 장점을 합친 구조로써, `Interface`를 통해 타입이 정의된 메소드들과 일부 공통 기능이 담긴 default method 들을 `Abstract class` 에 상속하여 타 메소드들을 구현하고 이러한 `Abstract Class`를 확장하는 것으로써 `Interface` 구현에 필요한 대부분의 요소를 만족하게 된다.
 
+# 7. 인터페이스는 구현하는 쪽을 생각해 설계하라
+Java 8 이전의  `Interface` 객체는 기존 구현체들을 깨뜨리지 않고는 별도의 메소드를 추가할 수 없었다. 허나 Java 8부터 `Interface`에 default method 추가가 가능해짐에 따라 기존 구현체를 유지하면서 `Interface` 객체에 신규 메소드를 추가할 수 있게 되었다.
+
+이러한 점은 Java 8 이전에 구현된 관련 구현체들에 심각한 타격을 줄 수 있는데, `Interface`객체를 컴파일 할 때에는 문제가 안되지만 해당 `Inteface` 구현체의 경우에는 어떠한 Side Effect가 발생할 지 알 수 없다.
+- *그도 그럴 것이 해당 구현체들은 자신이 사용하는 `Interface`에 신규 메소드가 추가될 것을 고려하지 않았기 때문임*
+
+결국 `Interface`를 구현할 때에는 이처럼 해당 객체를 기반으로 구현체를 구현하는 쪽의 부분도 신경써야 한다.
+
+
 
