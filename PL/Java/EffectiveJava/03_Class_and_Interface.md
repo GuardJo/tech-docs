@@ -95,5 +95,41 @@ Java에서는 객체 지향 프로그래밍의 강력한 요소 중 하나인 �
 또한, 상속을 고려하여 객체를 구성하였을 경우에는 생성자에서 재정의 가능한 메소드를 호출해서는 안된다.
 Java에서는 하위 객체의 생성자보다 상위 객체의 생성자를 우선적으로 호출하며, 만약 이때 하위 객체에서 재정의된 함수를 호출할 경우 해당 함수는 아직 하위객체 생성자도 진입하지 못한 상태이므로 예기치 못한 오류가 발생할 수 있다.
 - *Cloneable, Serializable 구현체도 생성자와 마찬가지의 주의가 필요하다.*
+# 6. 추상클래스 보다는 인터페이스를 우선하라
+Java에서는 하나의 메소드를 여러 객체에서 구현하거나 재정의할 수 있도록 `Abstract Class`와 `Interface` 객체를 제공한다.
+
+기존에는 `Interface`는 별도로 구현된 메소드를 지닐 수 없었으나 java 8부터 `default method`를 구현할 수 있게 되면서 더욱이 상속보다 더 우선시 되는 요소가 되었다.
+
+이는 앞서 설명한 상속의 단점과 이어지는데, 특정 객체를 `Abstract Class`를 상속하여 구현할 경우 해당 객체는 상위 객체에 종속적일 수밖에 없게 된다.
+그에 반해 `Interface`에 대한 구현체로 만들 경우 요구하는 메소드만 추가하면 된다.
+- *하나의 객체는 하나의 `Abstract class`만 상속받을 수 있으나 `Interface`는 제한 없이 상속 받을 수 있음*
+
+또한 `Interface`는 `Abstract Class`와 다르게 비계층적으로 구조를 구성할 수 있다.
+
+```java
+public interface Singer {
+	AudioClip sing(String s);
+}
+...
+public interface Songwriter {
+	Song compose(int chartPosition);
+}
+```
+
+만약 위와  같은 `Interface`를 `Abstract Class`로 구현 했을 경우 위 요소들을 상속 받는 하위 객체는 `Singer`이거나 `Songwriter` 이거나 둘 중 하나만 받을 수 있게 되고 둘 모두를 동일한 레벨로 구현할 수 없지만, `Interface`의 경우 아래와 같이 둘 모두를 상속할 수도 있게 되어, 비계층적으로 구현 할 수도 있다.
+
+```java
+public interface SingerSongwriter extends Singer, Songwriter {
+	AudioClip sing(String s);
+	Song compose(int chartPosition);
+}
+```
+
+위와 같이 `Abstract Class`에 비해 `Interface`는 객체 상속 간에 보다 자유롭게 상속하여 구조를 구성할 수 있다.
+
+> [!NOTE]
+> **추상 골격 구현 : Template Method Pattern**
+> 
+> `Interface`와 `Abstract class`의 장점을 합친 구조로써, `Interface`를 통해 타입이 정의된 메소드들과 일부 공통 기능이 담긴 default method 들을 `Abstract class` 에 상속하여 타 메소드들을 구현하고 이러한 `Abstract Class`를 확장하는 것으로써 `Interface` 구현에 필요한 대부분의 요소를 만족하게 된다.
 
 
