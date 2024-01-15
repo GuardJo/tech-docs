@@ -165,3 +165,55 @@ public class PhysicalConstants {
 >[!NOTE]
 > Java 9 부터는 숫자 리터럴에 `_` 를 사용함으로써 보다 가독성을 높여줄 수 있다.
 > 
+
+# 9. 태그 달린 클래스보다는 클래스 계층 구조를 활용하라
+아래와 같이 사용하는 경우는 거의 없겠지만, 예를 들어 아래와 같이 태그(Shape) 를 통해 인스턴스를 구별하여 동작을 수행하는 요소가 있다고 한다.
+
+```java
+class Figure {
+	enum Shape { RECTANGLE, CIRCLE };
+
+	// 태그 필드
+	final Shape shape;
+	// Rectangle에만 필요한 필드
+	double length;
+	double width;
+	// Circle에만 필요한 필드
+	double radius;
+
+	// Circle 용 생성자
+	// Rectangle 용 생성자
+
+	public double area() {
+		switch(shape) {
+			case RECTANGLE : 
+				return length * width;
+			case CIRCLE : 
+				return Math.PI * (radius * radius);
+			default :
+				...
+		}
+	}
+}
+```
+
+위와 같이 하나의 객체에서 태그 필드(Shape)에 따라 내부적인 로직이 다를 경우, 해당 객체는 사용하지 않는 필드들에 대한 불필요한 초기화 작업 및, 해당 태그 별 값 반환을 위해 불필요한 분기 작업 등을 거쳐야 한다.
+
+이러한 구조는 매우 비효울적인 구조이며, 사용자 실수로 에러가 발생하기 쉽다. 이런 경우에는 주로 공통 부분읠 `Abstract Class`로 구현한 후 해당 객체를 상속 받아 여러 타입으로 구성하는 것이 보다 바람직 하다.
+
+```java
+abstract class Figure {
+	abstract double area();
+}
+...
+class Circle extends Figure {
+	...
+}
+...
+class Rectangle extends Figure {
+...
+}
+```
+
+위와 같이 `Abstract Class`로 Figure 객체를 구성한 후 공통적으로 필요한 `area()`함수만을 구성해둔 후 Circle과 Rectangle 등 각각 개별적으로 필요한 필드들은 해당 객체에서 선언하면, 앞선 태그를 사용하는 방식보다 훨씬 효율적으로 코드를 구성할 수 있으며, 사용자 실수도 줄일 수 있다.
+- *또한 이렇게 구성함으로써 향후 다른 도형 객체들로 확장하기도 용이함*
