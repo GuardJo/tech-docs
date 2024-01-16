@@ -83,3 +83,109 @@ list.add("test");
 > [!NOTE]
 > Java에서 배열과 List 등의 제네릭 객체는 서로 반대되는 속성을 지니고 있기에 제네릭 객체의 타입 매개변수로 배열은 제공하지 않는다.
 
+# 4. 이왕이면 제네릭 타입으로 만들라
+Java에서 지원하는 `Generic`은 타입 매개변수에 대한 자동 형변환 및 컴파일 시점 비검사 경고 등을 제공하기에 아래와 같은 코드는 `Generic` 으로 개선하는 것이 좋다.
+
+```java
+public class CustomStack {  
+    private final static int DEFAULT_CAPACITY = 20;  
+    private Object[] elements;  
+    private int size = 0;  
+  
+    public CustomStack() {  
+       elements = new Object[DEFAULT_CAPACITY];  
+    }  
+  
+    public void push(Object o) {  
+       ensureCapacity();  
+       elements[size++] = o;  
+    }  
+  
+    public Object pop() {  
+       if (size == 0) {  
+          throw new EmptyStackException();  
+       }  
+       Object result = elements[size--];  
+       elements[size] = null;  
+  
+       return result;  
+    }  
+  
+    private void ensureCapacity() {  
+       if (elements.length == size) {  
+          elements = Arrays.copyOf(elements, 2 * size + 1);  
+       }  
+    }  
+}
+```
+
+위 코드의 경우 작동에는 문제가 없으나, pop() 등의 메소드를 통해 원소를 꺼내온 경우 꺼낸 원소를 사용자가 별도의 형변환을 거쳐야 하는 불편함이 존재한다.
+
+그렇기에 위의 코드를  `Generic`으로 개선하기 위해서는 우선 아래와 같이 Object 타입을 타입 매개변수로 변경해야 한다.
+```java
+public class CustomStack<E> {  
+    private final static int DEFAULT_CAPACITY = 20;  
+    private E[] elements;  
+    private int size = 0;  
+  
+    public CustomStack() {  
+       elements = new E[DEFAULT_CAPACITY];  
+    }  
+  
+    public void push(E o) {  
+       ensureCapacity();  
+       elements[size++] = o;  
+    }  
+  
+    public E pop() {  
+       if (size == 0) {  
+          throw new EmptyStackException();  
+       }  
+       E result = elements[size--];  
+       elements[size] = null;  
+  
+       return result;  
+    }  
+  
+    private void ensureCapacity() {  
+       if (elements.length == size) {  
+          elements = Arrays.copyOf(elements, 2 * size + 1);  
+       }  
+    }  
+}
+```
+
+class 명 부분에 타입 매개변수를 추가하였으며, 내부 배열의 타입을 타입 매개변수 E 로 수정하였다.
+하지만 위 코드는 정상적으로 수헹되지 않는다.  앞선 내용에 따라 배열과 `Generic`은 서로 상반된 속성을 지니고 있기에 배열의 타입을 `Generic`으로 초기화 할 수가 없다.
+
+그렇기에 보통 이러한 경우 아래 두 가지 경우로 구성한다.
+
+**(1) Object 배열 생성 후 E 로 형변환**
+```java
+@SuppressWarnings("unchecked")  
+public CustomStack() {  
+    elements = (E[])new Object[DEFAULT_CAPACITY];  
+}
+```
+위와 같이 우선 Object 타입으로 배열 생성 후 이를 E 로 형변환 하는 방법이 있다.
+비록 컴파일러가 해당 요소에 대해 비검사 경고를 주긴 하나, 개발자 입장에서 해당 배열을 private 으로 선언 후 해당 배열에 주입되는 push() 메소드에 인자로 E를 받고 있기에 이 배열에는 E 타입만 주입된다는 것을 알 수 있다.
+- *타입에 대한 안정성이 확보되기에 해당 비검사 경고를 작은 범위에서 제외해줌*
+
+**(2) Object 배열 생성, 반환 타입을 E로 형변환**
+```java
+public E pop() {  
+    if (size == 0) {  
+       throw new EmptyStackException();  
+    }  
+    @SuppressWarnings("unchecked") E result = (E)elements[size--];  
+    elements[size] = null;  
+    
+    return result;  
+}
+```
+
+위와 같이 기본 배열은 Object 타입으로 두고 내부 원소 반환 시에만 E 로 형변환할 수도 있다. 앞선 방법과 마찬가지로 push() 함수가 이미 E 타입의 객체만을 가져오기에 해당 형변환은 안전함을 확인할 수 있으며, 그에 따라 경고를 제외할 수 있다.
+
+> [!NOTE]
+> 결국 어떠한 신규 객체를 구현할 때에는 형변환을 컴파일러 입장에서 지원하도록 `Generic`으로 구현하는 것이 더 안전하고 쓰기 편하다.
+
