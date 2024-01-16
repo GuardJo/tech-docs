@@ -214,3 +214,69 @@ public Set<T> union(Set<T> s1, Set<T> s2) {
 ```
 
 위와 같이 `Generic` 으로 선언하였기에 입력받는 인자에 대한 타입 검증, 반환 타입 등에 대한 지원등을 Java에 일임할 수 있다.
+
+# 6. 한정적 와일드카드를 사용해 API 유언성을 높여라
+Java에서 `Generic` 타입의 타입 매개변수는 불공변한 속성을 지니고 있다.
+`List<String>`, `List<Object>`를 예로 보면 이 둘의 타입 매개변수만 보았을 때에는 `String` 타입이 `Object` 타입의 하위 타입이지만, `List` 로써 보면 서로는 별개의 객체이다.
+- *`List<String>`에는 String 포함 하위타입만 주입할 수 있으나, `List<Object>`에는 Object이하 모든 하위 타입을 주입할 수 있기에, `List<String>`이 모든 일을 대체할 수 없어, 하위 타입이 아닌 것이 맞음 ([리스코프 치환 원칙](../../OOP.md))*
+
+하지만 이러한 불공변 속성 때문에 아래와 같은 시나리오에서 문제가 발생할 수 있다.
+```java
+public Stack<E> {
+	...
+	public void pushAll(Interable<E> src) {
+		for (E e : src) {
+			push(e);
+		}
+	}
+}
+...
+Stack<Number> numberStack = new Stack<>();
+Interable<Integer> integers = ...;
+numberStack.pushAll(integers); // Error!
+```
+
+위와 같이 `Generic`한 Stack이 구현되어 있을 경우, 타입 매개변수가 `Number`인 Stack에 `Number`의 하위 타입인 `Integer`를 넣게 되면 오류가 발생한다.
+- *사용자 입장에서는 `Integer`가 `Number`의 하위 타입이니 주입되어야 한다고 생각함*
+
+이러한 문제가 발생할 수 있기에 `Generic` 기반으로 API를 구현할 때에는 아래와 같이 특정 타입 매개변수 뿐 아니라 조금 더 포괄적으로 타입 매개변수를 관리해야 한다.
+```java
+public void pushAll(Iterable<? extends E> src) {
+	...
+} 
+```
+
+위와 같이 `? extends E` 등을 한정적 타입 매개변수라 하며, 이는 E 라는 타입 매개변수의 하위 타입까지 입력으로 받아들일 수 있다는 뜻이다.
+- *위와 같이 수정할 경우 E (`Numnber`) 일 때, ? (`Integer`) 가 `Number`의 하위타입이 맞기에 사용자가 생각한대로 동작할 수 있게 됨*
+
+위와 같은 경우는 입력으로 주어진 인자를 특정 객체 내 주입 하는 등의 생성자 (Producer) 역할이었으며, 아래와 같이 입력 인자에 작업을 수행하여 소비하는 소비자 (consumer) 일 때는 별도의 한정적 타입 매개 변수를 사용해야 한다.
+```java
+public void popAll(Collection<E> dst) {
+	while (!isEmpty()) {
+		dst.add(pop());
+	}
+}
+...
+Stack<Number> numberStack = new Stack<>();
+Collection<Object> objects = ...;
+numberStack.popAll(objects);
+```
+
+위의 경우 `Object` 는 `Number` 타입보다 상위 객체이며, 그렇기에 `Number` 타입의 Stack에서 pop() 수행이 자연스러워 보이지만, 마찬가지로 `Generic`의 불공변 속성으로 인해 제대로 수행되지 않는다.
+
+popAll() 과 같은 소비자 (Consumer) 인 인자를 받을 때에는 생성자 (Producer) 와는 반대로 인자의 타입이 타입 매개변수의 상위 타입이어야 한다.
+
+```java
+public void popAll(Collection<? super E> dst) {
+	...
+}
+```
+
+위와 같이 `? super E` 처럼 해당 타입 매개변수의 상위 타입 임을 한정적 타입 매개변수로 지정하여 보다 유연하게 값들을 입력 받을 수 있게 된다.
+- *모든 타입은 자기 자신의 상위 타입임*
+
+> [!NOTE]
+> **PESC 공식**
+> 
+> PESC : Producer-Extends, Consumer-Super 의 약자로, 모든 생성자는 해당 타입 매개변수의 하위 타입을 포함해야 하며, 모든 소비자는 해당 타입 매개변수의 상위 타입을 포함해야 한다.
+
