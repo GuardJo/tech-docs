@@ -308,3 +308,31 @@ public final void print(List<Integer>... list) {
 > `@SafeVarargs` 어노테이션을 통한 경고 제외 처리 시에는, 해당 메소드가 재정의가 불가한 경우에만 제외처리해야 한다.
 > - *재정의가 가능한 메소드인 경우 하위 객체에서 해당 메소드를 재정의 했을 때 안전한지를 보장할 수 없기 때문*
 
+# 8. 타입 안전 이종 컨테이너를 고려하라
+Java 라이브러리에서 제공하는 `Set<E>`, `Map<K, V>` 등으로 `Generic` 이 많이 쓰인다.
+이 때 해당 `Generic`타입에 대한 타입 매개변수는 그 수가 고정적으로 할당되어 있다.
+
+이 때 사용자의 요구사항이나 비즈니스 로직 구현 등을 이유로 여러 타입을 동적으로 받아 처리허면서도 형변환 등의 이슈에 대해 안정적이기 위해 `Generic` 타입으로 객체 구현이 필요할 경우에는 아래와 같이 구현할 수 있다.
+
+```java
+public class Favorite {
+	private Map<Class<?>, Object> favorites = new HashMap<>();
+
+	public <T> void putFavorite(Class<T> type, T instance) {
+		favorites.put(Objects.requireNonNull(type), instance);
+	}
+	public <T> T getFavorite(Class<T> type) {
+		return type.cast(favorites.get(type));
+	}
+}
+```
+
+핵심은 앞선 `Set<K>`, `Map<K, V>` 등과 다르게 타입 매개변수 자체를 해당 객체의 데이터 타입으로 사용하는 것이 아닌, key 값으로 제공하여, key 값에 해당하는 실제 인스턴스를 반환하여 사용하는 것이다.
+
+이럴 경우 사용자 입장에서는 명시적으로 전달한 데이터 타입(class) 에 대해 안정적인 형변환을 보장하기에, 여러 데이터 타입으로 관련 기능을 사용하더라도 문제의 요지가 적다.
+
+하지만  이 또한 불안정적인 측면이 존재한다. 우선 키값으로 할당되는 타입과 실제 값으로 주입되는지 여부를 명확하게 제어할 수 없다.
+- 이에 대해서는 `cast()` 등을 사용하여 값 주입 간 동적 형변환 후 주입하는 방안으로 우회 가능
+
+또한,  키값에 대한 타입으로 `Generic` 타입은 넣을 수가 없다.
+- *`List<String>` , `List<Integer>`용 Class 등을 얻을 수 없기 때문*
