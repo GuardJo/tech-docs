@@ -46,7 +46,7 @@ ClassLoader가 .class 파일들을 읽고 번역된 이진 데이터를 Method �
 **Method 영역에 저장되는 요소**
 - FGCN (Full Qualified Class Name)
 - Class, Interface, Enum 객체
-- 메소드와 변
+- 메소드와 변수
 
 Loading 작업이 끝나면 Loading 된 타입의 Class 객체를 생성하여 Heap 영역에 저장한다.
 
@@ -130,15 +130,15 @@ Heap 영역은 아래와 같은 구조로 이루어져 있다.
 > [!NOTE]
 > **Reflection API**
 > 
-> 객체를 통해 Class의 정보를 분석해내는 기법
-> 컴파일된 바이트코드를 기반으로 관련된 Class 정보를 식별한다.
+> 객체를 통해 Class의 정보를 분석해내는 기법으로 컴파일된 바이트코드를 기반으로 관련된 Class 정보를 식별한다.
 > 
 
 - New/Young Generation
 	생명주기가 짧은 객체들을 GC 대상으로 하는 영역이다.
 	- 여기서 발생하는 GC가 Minor GC 이다.
 	- Eden : 객체가 최초로 생성되는 공간
-	- Survivor 0, 1 : Eden에서 참조되는 체들의 저장 공간
+	- Survivor 0, 1 : Eden에서 참조되는 객체들의 저장 공간
+
 > [!NOTE]
 > Eden 영역이 가득 찰 경우 Survivor 영역으로 복사 한 후 나머지 객체들을 제거한다.
 
